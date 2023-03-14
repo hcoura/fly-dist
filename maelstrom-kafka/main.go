@@ -31,8 +31,7 @@ type CommitOffsetMsg struct {
 func main() {
 	n := maelstrom.NewNode()
 	lkv := maelstrom.NewLinKV(n)
-	skv := maelstrom.NewSeqKV(n)
-	db := NewDB(n, lkv, skv)
+	db := NewDB(n, lkv)
 
 	n.Handle("send", func(msg maelstrom.Message) error {
 		var body SendMsg
@@ -70,7 +69,7 @@ func main() {
 			return err
 		}
 
-		db.commitOffsets(body.Offsets)
+		go db.commitOffsets(body.Offsets)
 
 		return n.Reply(msg, map[string]any{"type": "commit_offsets_ok"})
 	})
